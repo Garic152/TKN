@@ -1,0 +1,41 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    # CMake configuration
+    - name: Install CMake and OpenSSL
+      run: sudo apt-get install cmake libssl-dev
+
+    - name: CMake configure
+      run: cmake -B build -S .
+
+    - name: CMake build
+      run: cmake --build build
+
+    - name: CMake test (optional)
+      run: cmake --build build --target test
+
+    # Packaging (optional)
+    - name: CMake package
+      run: cmake --build build --target package
+
+    # Original steps
+    - name: configure
+      run: ./configure
+    - name: make
+      run: make
+    - name: make check
+      run: make check
+    - name: make distcheck
+      run: make distcheck
