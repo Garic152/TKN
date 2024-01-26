@@ -24,6 +24,7 @@
 struct peer predecessor; 
 struct peer self;
 struct peer successor; 
+struct peer NULL_PEER = {0};
 int dht_socket;
 
 
@@ -44,6 +45,10 @@ unsigned long time_ms(void) {
     struct timespec spec;
     clock_gettime(CLOCK_REALTIME, &spec);
     return 1000 * spec.tv_sec + round(spec.tv_nsec / 1.0e6);
+}
+
+bool is_peer_equal(struct peer self, struct peer other) {
+    return self.id == other.id && self.ip.s_addr == other.ip.s_addr && self.port == other.port;
 }
 
 
@@ -155,8 +160,19 @@ static void process_reply(const struct dht_message* reply) {
     lookup_cache[oldest_idx].peer = reply->peer;
 }
 
+static void process_stabilize(const struct dht_message* reply) {
+    dht_notify(predecessor, reply->peer);
+}
+
 static void process_notify(const struct dht_message* reply) {
-    successor = reply->peer;
+    // if (is_peer_equal(predecessor, NULL_PEER)) {
+    //     predecessor = reply->peer;
+    //     return;
+    // };
+
+    if (!is_peer_equal(successor, reply->peer)) {
+        successor = reply->peer;
+    };
 }
 
 static void process_join(const struct dht_message* reply) {
@@ -178,7 +194,7 @@ static void dht_process_message(struct dht_message* msg) {
     } else if (msg->flags == REPLY) {
         process_reply(msg);
     } else if (msg->flags == STABILIZE) {
-
+        process_stabilize(msg);
     } else if (msg->flags == NOTIFY) {
         process_notify(msg);
     } else if (msg->flags == JOIN) {
