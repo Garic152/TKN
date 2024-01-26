@@ -155,6 +155,19 @@ static void process_reply(const struct dht_message* reply) {
     lookup_cache[oldest_idx].peer = reply->peer;
 }
 
+static void process_notify(const struct dht_message* reply) {
+    successor = reply->peer;
+}
+
+static void process_join(const struct dht_message* reply) {
+    // Join message is for this node
+    if (predecessor.id < reply->peer.id && self.id > reply->peer.id) {
+        predecessor = reply->peer;
+        dht_notify(self, reply->peer);
+    } else {
+        dht_join(reply->peer, successor);
+    };
+}
 
 /**
  * Process an incoming DHT message
@@ -164,6 +177,10 @@ static void dht_process_message(struct dht_message* msg) {
         process_lookup(msg);
     } else if (msg->flags == REPLY) {
         process_reply(msg);
+    } else if (msg->flags == NOTIFY) {
+        process_notify(msg);
+    } else if (msg->flags == JOIN) {
+        process_join(msg);
     } else {
         printf("Received invalid DHT Message\n");
     }
@@ -242,6 +259,24 @@ void dht_lookup(dht_id id) {
         .peer = self,
     };
     dht_send(&msg, &successor);
+}
+
+void dht_stabilize(struct peer peer) {
+    struct dht_message msg = {
+        .flags = STABILIZE,
+        .hash = self.id,
+        .peer = self,
+    };
+    dht_send(&msg, &successor);
+}
+
+void dht_notify(struct peer successor, struct peer originator) {
+    struct dht_message msg = {
+        .flags = NOTIFY,
+        .hash = 0,
+        .peer = successor,
+    };
+    dht_send(&msg, &originator);
 }
 
 void dht_join(struct peer originator, struct peer peer) {

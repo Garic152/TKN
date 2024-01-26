@@ -12,13 +12,17 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <openssl/sha.h>
+#include <time.h>
 
 #include "data.h"
+#include "log.h"
 #include "http.h"
 #include "util.h"
 #include "dht.h"
 
 #define MAX_RESOURCES 100
+
+int currentLogLevel = LOG_LEVEL_DEBUG;
 
 
 struct tuple resources[MAX_RESOURCES] = {
@@ -395,7 +399,6 @@ int main(int argc, char** argv) {
 
     struct connection_state state = {0};
     while (true) {
-
         // Use poll() to wait for events on the monitored sockets.
         int ready = poll(sockets, sizeof(sockets) / sizeof(sockets[0]), -1);
         if (ready == -1) {
@@ -442,7 +445,6 @@ int main(int argc, char** argv) {
                 }
             }
         }
-
     }
 
     return EXIT_SUCCESS;
