@@ -177,6 +177,8 @@ static void dht_process_message(struct dht_message* msg) {
         process_lookup(msg);
     } else if (msg->flags == REPLY) {
         process_reply(msg);
+    } else if (msg->flags == STABILIZE) {
+
     } else if (msg->flags == NOTIFY) {
         process_notify(msg);
     } else if (msg->flags == JOIN) {

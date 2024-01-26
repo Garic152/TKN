@@ -12,7 +12,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <openssl/sha.h>
-#include <time.h>
 
 #include "data.h"
 #include "log.h"
@@ -400,7 +399,12 @@ int main(int argc, char** argv) {
     struct connection_state state = {0};
     while (true) {
         // Use poll() to wait for events on the monitored sockets.
-        int ready = poll(sockets, sizeof(sockets) / sizeof(sockets[0]), -1);
+        int ready = poll(sockets, sizeof(sockets) / sizeof(sockets[0]), 1000);
+
+        if (ready == 0) {
+            dht_stabilize(successor);
+            continue;
+        }
         if (ready == -1) {
             perror("poll");
             exit(EXIT_FAILURE);
