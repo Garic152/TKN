@@ -161,17 +161,17 @@ static void process_reply(const struct dht_message* reply) {
 }
 
 static void process_stabilize(const struct dht_message* reply) {
+    if (is_peer_equal(predecessor, NULL_PEER)) {
+        predecessor = reply->peer;
+    };
+
     dht_notify(predecessor, reply->peer);
 }
 
 static void process_notify(const struct dht_message* reply) {
-    // if (is_peer_equal(predecessor, NULL_PEER)) {
-    //     predecessor = reply->peer;
-    //     return;
-    // };
-
     if (!is_peer_equal(successor, reply->peer)) {
         successor = reply->peer;
+        dht_stabilize(successor);
     };
 }
 

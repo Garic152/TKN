@@ -397,6 +397,7 @@ int main(int argc, char** argv) {
 
     if (join_mode) {
         struct peer peer = peer_from_args("0", argv[4], argv[5]);
+        predecessor = NULL_PEER;
         dht_join(self, peer);
     };
 
