@@ -78,6 +78,8 @@ extern struct peer self;
  */
 extern struct peer successor;
 
+extern struct peer NULL_PEER;
+
 /**
  * The socket used for communicating with the DHT
  */
