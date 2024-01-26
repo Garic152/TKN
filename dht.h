@@ -21,6 +21,8 @@ enum {
     LOOKUP,
     REPLY,
     N_OPCODES,
+    NOTIFY,
+    JOIN,
 };
 
 /**
@@ -103,6 +105,11 @@ void peer_to_sockaddr(const struct peer* peer, struct sockaddr_in* addr);
  * Send a lookup message for the given ID
  */
 void dht_lookup(dht_id id);
+
+/**
+ * Send a join message for the given ID to the given peer
+ */
+void dht_join(struct peer originator, struct peer peer);
 
 /**
  * Receive and process a DHT message

@@ -244,6 +244,15 @@ void dht_lookup(dht_id id) {
     dht_send(&msg, &successor);
 }
 
+void dht_join(struct peer originator, struct peer peer) {
+    struct dht_message msg = {
+        .flags = JOIN,
+        .hash = 0,
+        .peer = originator,
+    };
+    dht_send(&msg, &peer);
+}
+
 
 void dht_handle_socket(void) {
     struct sockaddr address = {0};

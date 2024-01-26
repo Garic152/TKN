@@ -357,6 +357,8 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
     const string id_arg = (argc > 3) ? argv[3] : "0";
+    // Q: Why do we not need to use struct peer self = ... here?
+    // I do need to use this for peer down in join_mode
     self = peer_from_args(id_arg, argv[1], argv[2]);
 
     struct sockaddr_in addr;
@@ -368,6 +370,7 @@ int main(int argc, char** argv) {
 
     // Check if the program is running in static mode or join mode.
     const bool static_mode = getenv("PRED_ID") && getenv("PRED_IP") && getenv("PRED_PORT") && getenv("SUCC_ID") && getenv("SUCC_IP") && getenv("SUCC_PORT");
+    const bool join_mode = argc == 6;
 
     if (static_mode) {
         // If running in static mode, use the provided predecessor and successor information.
@@ -383,6 +386,11 @@ int main(int argc, char** argv) {
     struct pollfd sockets[3] = {
         { .fd = server_socket, .events = POLLIN },
         { .fd = dht_socket, .events = POLLIN },
+    };
+
+    if (join_mode) {
+        struct peer peer = peer_from_args("0", argv[4], argv[5]);
+        dht_join(self, peer);
     };
 
     struct connection_state state = {0};
