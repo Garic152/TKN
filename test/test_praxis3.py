@@ -24,7 +24,8 @@ def dynamic_peer(request):
         It can be started with predefined `neighbors`, similar to a static peer.
         Alternatively, it receives an `anchor`-peer it tries to join, or becomes its own DHT.
         """
-        assert not (neighbors and anchor), "Cannot start joining peer with neighborhood"
+        assert not (
+            neighbors and anchor), "Cannot start joining peer with neighborhood"
 
         if neighbors:
             predecessor, successor = neighbors
@@ -41,7 +42,8 @@ def dynamic_peer(request):
             env = {}
 
         return util.KillOnExit(
-            [request.config.getoption('executable'), peer.ip, f'{peer.port}', f'{peer.id}'] + args,
+            [request.config.getoption(
+                'executable'), peer.ip, f'{peer.port}', f'{peer.id}'] + args,
             env=env
         )
 
@@ -91,7 +93,8 @@ def test_notify(dynamic_peer, timeout):
         time.sleep(0.1)
 
         # Expect notify
-        dht.expect_msg(prev_mock, dht.Message(dht.Flags.notify, None, predecessor))
+        dht.expect_msg(prev_mock, dht.Message(
+            dht.Flags.notify, None, predecessor))
 
         assert (
             util.bytes_available(pred_mock) == 0
@@ -180,7 +183,8 @@ def test_join_forward(dynamic_peer, timeout):
         assert (
             util.bytes_available(pred_mock) == 0
         ), "Data received on predecessor socket"
-        assert util.bytes_available(join_mock) == 0, "Data received on joining socket"
+        assert util.bytes_available(
+            join_mock) == 0, "Data received on joining socket"
 
 
 def test_join_react(dynamic_peer, timeout):
@@ -227,7 +231,8 @@ def test_dht(dynamic_peer):
     datum = "b23464529c2c4697"
     content = b"cdd3b63981a25b09820b40aaef2e9405b9fef79e9d2b922ebc2cd5d68b0527de"
 
-    peers = [dht.Peer(id_, "127.0.0.1", 4710 + i) for i, id_ in enumerate(dht_ids)]
+    peers = [dht.Peer(id_, "127.0.0.1", 4710 + i)
+             for i, id_ in enumerate(dht_ids)]
 
     with contextlib.ExitStack() as contexts:
 
@@ -261,7 +266,8 @@ def test_dht(dynamic_peer):
 
         # Ensure datum exists
         contact = peers[2]
-        reply = util.urlopen(f"http://{contact.ip}:{contact.port}/dynamic/{datum}")
+        reply = util.urlopen(
+            f"http://{contact.ip}:{contact.port}/dynamic/{datum}")
         assert reply.status == 200
         assert (
             reply.read() == content
@@ -273,7 +279,8 @@ def test_dht(dynamic_peer):
             f"http://{contact.ip}:{contact.port}/dynamic/{datum}"
         ).geturl()  # Determine correct URL
         reply = util.urlopen(req.Request(real_url, method="DELETE"))
-        assert reply.status in {200, 202, 204}, f"Deletion of '/dynamic/{datum}' did not succeed"
+        assert reply.status in {
+            200, 202, 204}, f"Deletion of '/dynamic/{datum}' did not succeed"
 
         # Ensure datum is missing
         contact = peers[4]

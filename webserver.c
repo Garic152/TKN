@@ -376,6 +376,10 @@ int main(int argc, char** argv) {
     const bool static_mode = getenv("PRED_ID") && getenv("PRED_IP") && getenv("PRED_PORT") && getenv("SUCC_ID") && getenv("SUCC_IP") && getenv("SUCC_PORT");
     const bool join_mode = argc == 6;
 
+    if (join_mode) {
+      LOG(LOG_LEVEL_INFO, "This node is joining the DHT, ID: %d", self.id);
+    }
+
     const char* no_stabilize_env = getenv("NO_STABILIZE");
     const bool no_stabilize = (no_stabilize_env != NULL) && (strcmp(no_stabilize_env, "1") == 0);
 
@@ -397,15 +401,25 @@ int main(int argc, char** argv) {
 
     if (join_mode) {
         struct peer peer = peer_from_args("0", argv[4], argv[5]);
+        predecessor = NULL_PEER;
         dht_join(self, peer);
     };
 
+    if (self.id == predecessor.id) {
+      LOG(LOG_LEVEL_WARN, "Self ID equal to predecessor, ID: %d", self.id);
+    } else if (self.id == successor.id) {
+      LOG(LOG_LEVEL_WARN, "Self ID equal to successor, ID: %d", self.id);
+    } else {
+      LOG(LOG_LEVEL_DEBUG, "Node IDs set up OKAY");
+    }
+
+    LOG(LOG_LEVEL_INFO, "Running node, ID: %d", self.id);
     struct connection_state state = {0};
     while (true) {
-        // Use poll() to wait for events on the monitored sockets.
         int ready = poll(sockets, sizeof(sockets) / sizeof(sockets[0]), 1000);
 
         if (ready == 0 && !no_stabilize) {
+            LOG(LOG_LEVEL_DEBUG, "Sending periodic stabilize...");
             dht_stabilize(successor);
             continue;
         }
