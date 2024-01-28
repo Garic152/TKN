@@ -1,0 +1,2 @@
+cd ~/code/c/dynamic-dht/
+pRED_ID=4000 PRED_IP=127.0.0.1 PRED_PORT=2003 SUCC_ID=8000 SUCC_IP=127.0.0.1 SUCC_PORT=2005 ./build/webserver 127.0.0.1 2004 6000
