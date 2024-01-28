@@ -13,8 +13,9 @@
 #include <string.h>
 #include <sys/types.h>
 #include <time.h>
-
 #include <openssl/sha.h>
+
+#include "log.h"
 
 #define LOOKUP_CACHE_ENTRIES 30
 #define LOOKUP_CACHE_VALIDIY_MS 2000
@@ -84,6 +85,11 @@ static bool peer_cmp(const struct peer *a, const struct peer *b) {
  */
 static void dht_send(struct dht_message *msg, const struct peer *peer) {
   dht_serialize(msg);
+
+  if (peer->id == self.id) {
+    LOG(LOG_LEVEL_ERROR, "Sending to same node, ID: %d, MSG_TYPE: %d", self.id, msg->flags);
+  }
+
 
   struct sockaddr_in addr;
   peer_to_sockaddr(peer, &addr);
@@ -160,9 +166,12 @@ static void process_stabilize(const struct dht_message *reply) {
 }
 
 static void process_notify(const struct dht_message *reply) {
+  if (is_peer_equal(self, reply->peer)) {
+    return;
+  }
+
   if (!is_peer_equal(successor, reply->peer)) {
     successor = reply->peer;
-    dht_stabilize(successor);
   };
 }
 
